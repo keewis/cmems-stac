@@ -39,6 +39,13 @@ old_tac_id = re.compile(
     flags=re.VERBOSE,
 )
 
+thematics = {
+    "PHY": ["physical"],
+    "BGC": ["biogeochemistry"],
+    "PHYBGC": ["physical", "biogeochemistry"],
+    "PHYBGCWAV": ["physical", "biogeochemistry", "waves"],
+}
+
 
 @dataclass(frozen=True)
 class MFCCollectionId:
@@ -56,6 +63,22 @@ class MFCCollectionId:
             raise ValueError(f"invalid model and forecasting center ID: {string}")
 
         return cls(**match.groupdict())
+
+    def to_stac(self):
+        geographical_areas = {
+            "ARCTIC": "arctic sea",
+            "BALTICSEA": "baltic sea",
+            "BLKSEA": "black sea",
+            "GLOBAL": "global",
+            "IBI": "iberia biscay ireland",
+            "MEDSEA": "mediterranean sea",
+            "NWSHELF": "northwest shelf",
+        }
+        return {
+            "cmems:geographical_area": geographical_areas[self.geographical_area],
+            "cmems:thematic": thematics[self.thematic],
+            "cmems:product_type": self.product_type.lower(),
+        }
 
 
 @dataclass(frozen=True)
@@ -78,6 +101,41 @@ class TACCollectionId:
         parts = match.groupdict()
         parts.setdefault("thematic", "PHY")
         return cls(**parts)
+
+    def to_stac(self):
+        geographical_areas = {
+            "ATL": "european atlantic ocean",  # IBI + NWS
+            "ARC": "arctic sea",
+            "BAL": "baltic sea",
+            "EUR": "european seas",  # MED + IBI + NWS + BAL + BLK
+            "GLO": "global",
+            "IBI": "iberia biscay ireland",
+            "MED": "mediterranean sea",
+            "NWS": "northwest shelf",
+        }
+        observation_types = {
+            "INSITU": "in-situ",
+            "OCEANCOLOUR": "ocean colour",
+            "SEAICE": "sea ice",
+            "SEALEVEL": "sea level",
+            "SST": "SST",
+            "WIND": "wind",
+            "WAVE": "wave",
+            "MULTIOBS": "multiobs",
+        }
+        product_types = {
+            "NRT": "near-real time",
+            "MY": "multiyear",
+            "MYNRT": "multiyear near-real time",
+            "STATIC": "static",
+        }
+
+        return {
+            "cmems:geographical_area": geographical_areas[self.geographical_area],
+            "cmems:thematic": thematics[self.thematic],
+            "cmems:observation_type": observation_types[self.observation_type],
+            "cmems:product_type": product_types[self.product_type],
+        }
 
 
 def parse_collection_id(string):
