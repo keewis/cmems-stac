@@ -38,6 +38,15 @@ old_tac_id = re.compile(
     """,
     flags=re.VERBOSE,
 )
+omi_id = re.compile(
+    r"""
+    (?P<product_type>OMI)
+    _(?P<omi_family>CLIMATE|HEALTH|CIRCULATION|VAR_EXTREME)
+    _(?P<omi_subfamily>[a-z]+)
+    _(?P<geographic_area>[A-Z]+)
+    _(?P<indicator_type>[a-z_]+)
+    """
+)
 
 thematics = {
     "PHY": ["physical"],
@@ -136,6 +145,23 @@ class TACCollectionId:
             "cmems:observation_type": observation_types[self.observation_type],
             "cmems:product_type": product_types[self.product_type],
         }
+
+
+@dataclass
+class OMICollectionId:
+    product_type: str
+    omi_family: str
+    omi_subfamily: str
+    geographical_area: str
+    indicator_type: str
+
+    @classmethod
+    def from_string(cls, string):
+        match = omi_id.fullmatch(string)
+        if match is None:
+            raise ValueError(f"invalid ocean monitoring indicator ID: {string}")
+
+        return cls(**match.groupdict())
 
 
 def parse_collection_id(string):
