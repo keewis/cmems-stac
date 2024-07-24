@@ -163,6 +163,80 @@ class OMICollectionId:
 
         return cls(**match.groupdict())
 
+    def to_stac(self):
+        families = {
+            "CLIMATE": "climate",
+            "HEALTH": "health",
+            "CIRCULATION": "circulation",
+            "VAR_EXTREME": "variability and extremes",
+        }
+        subfamilies = {
+            # climate
+            "sst": "sea surface temperature",
+            "ohc": "ocean heat uptake",
+            "ocu": "ocean carbon uptake",
+            "si": "sea ice change",
+            "sl": "sea level mean",
+            "ofc": "ocean freshwater",
+            # health
+            "chl": "chlorophyll production",
+            "pp": "primary production",
+            "ph": "acidification",
+            "oxygen": "deoxygenation",
+            "eutroph": "eutrophication",
+            "bloom": "blooms",
+            "oligo": "oligotrophication",
+            "coral": "coral health",
+            # circulation
+            "heattrans": "heat transport",
+            "voltranss": "volume transport",
+            "moc": "meridional overturning circulation",
+            "gyre": "gyres",
+            "upwell": "upwelling",
+            "boundary": "boundary currents",
+            "windcirc": "wind driven circulation",
+            # variability and extremes
+            "hmw": "marine heat waves",
+            "coldspell": "cold spells",
+            "climvar": "climate variability",
+            "state": "sea state",
+            "extremesl": "extreme sea level",
+            "storm": "storm potential",
+            "cyclone": "cyclone potential",
+        }
+        geographical_areas = {
+            "ATLANTIC": "atlantic",
+            "ARCTIC": "arctic sea",
+            "BALTIC": "baltic sea",
+            "BLKSEA": "black sea",
+            "EUROPE": "europe",
+            "GLOBAL": "global",
+            "IBI": "iberia biscay ireland",
+            "MEDSEA": "mediterranean sea",
+            "NORTHWESTSHELF": "northwest shelf",
+            "INDIAN": "indian ocean",
+            "PACIFIC": "pacific",
+            "SOUTHERN": "southern hemisphere",
+            "NORTHERN": "northern hemisphere",
+        }
+        indicator_types = {
+            "area_averaged_anomalies": "area averaged anomalies",
+            "trend": "trend",
+            "area_averaged_mean": "area averaged mean",
+            "enso_nino": "el nino southern oscillation",
+            "pdo": "pacific decadal oscillation",
+            "mei": "multivariate enso index",
+        }
+
+        return {
+            "cmems:omi_family": families[self.family],
+            "cmems:omi_family_abbrev": self.family,
+            "cmems:omi_subfamily": subfamilies[self.omi_subfamily],
+            "cmems:omi_subfamily_abbrev": self.omi_subfamily,
+            "cmems:geographical_area": geographical_areas[self.geographical_area],
+            "cmems:indicator_type": indicator_types[self.indicator_type],
+        }
+
 
 def parse_collection_id(string):
     for cls in [MFCCollectionId, TACCollectionId, OMICollectionId]:
