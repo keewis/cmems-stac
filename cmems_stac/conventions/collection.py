@@ -165,7 +165,7 @@ class OMICollectionId:
 
 
 def parse_collection_id(string):
-    for cls in [MFCCollectionId, TACCollectionId]:
+    for cls in [MFCCollectionId, TACCollectionId, OMICollectionId]:
         try:
             return cls.from_string(string)
         except ValueError:
