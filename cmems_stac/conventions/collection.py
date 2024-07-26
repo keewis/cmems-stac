@@ -42,7 +42,7 @@ omi_id = re.compile(
     r"""
     (?P<product_type>OMI)
     _(?P<omi_family>CLIMATE|HEALTH|CIRCULATION|VAR_EXTREME)
-    _(?P<omi_subfamily>[a-z]+)
+    _(?P<omi_subfamily>[a-zA-Z]+)
     _(?P<geographic_area>[A-Z]+)
     (?:_(?P<observation_type>[A-Z]+))?
     _(?P<indicator_type>[a-z_]+)
