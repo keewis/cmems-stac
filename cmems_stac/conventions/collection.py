@@ -192,7 +192,7 @@ class OMICollectionId:
         subfamilies = {
             # climate
             "sst": "sea surface temperature",
-            "ohc": "ocean heat uptake",
+            "ohc": "ocean heat content",
             "ocu": "ocean carbon uptake",
             "si": "sea ice change",
             "sl": "sea level mean",
