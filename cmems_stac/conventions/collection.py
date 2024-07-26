@@ -50,7 +50,7 @@ old_tac_id = re.compile(
 omi_id = re.compile(
     r"""
     (?P<product_type>OMI)
-    _(?P<omi_family>CLIMATE|HEALTH|CIRCULATION|VAR_EXTREME)
+    _(?P<omi_family>CLIMATE|HEALTH|CIRCULATION|VAR_EXTREME|EXTREME)
     _(?P<omi_subfamily>[a-zA-Z]+)
     _(?P<geographic_area>[A-Z]+)
     (?:_(?P<observation_type>[A-Z]+))?
@@ -187,6 +187,7 @@ class OMICollectionId:
             "HEALTH": "health",
             "CIRCULATION": "circulation",
             "VAR_EXTREME": "variability and extremes",
+            "EXTREME": "extremes",
         }
         subfamilies = {
             # climate
