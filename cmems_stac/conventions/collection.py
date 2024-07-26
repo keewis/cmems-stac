@@ -239,8 +239,8 @@ class OMICollectionId:
 
         try:
             return {
-                "cmems:omi_family": families[self.family],
-                "cmems:omi_family_abbrev": self.family,
+                "cmems:omi_family": families[self.omi_family],
+                "cmems:omi_family_abbrev": self.omi_family,
                 "cmems:omi_subfamily": subfamilies[self.omi_subfamily],
                 "cmems:omi_subfamily_abbrev": self.omi_subfamily,
                 "cmems:geographic_area": geographic_areas[self.geographic_area],
