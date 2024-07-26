@@ -62,11 +62,11 @@ old_omi_id = re.compile(
     r"""
     (?P<geographic_area>[A-Z]+)
     _(?P<product_type>OMI)
-    _(?P<omi_family>CURRENTS|OHC|TEMPSAL|HEALTH|SI|SL|CLIMVAR|WMHE|SEASTATE|NATLANTIC)
-    (?:_(?P<omi_subfamily>[a-zA-Z]+))?
+    (?:_(?P<omi_subfamily>CLIMVAR|HEALTH|CURRENTS|OHC|TEMPSAL|SI|SL|WMHE|SEASTATE|NATLANTIC|CURRENTS))?
+    (?:_(?P<omi_family>extreme_var))?
     (?:_(?P<observation_type>[A-Z]+))?
-    _(?P<indicator_type>[a-zA-Z0-9_]+)
-    (?:_[0-9]{1,3}_[0-9]{3})?
+    _(?P<indicator_type>[a-zA-Z0-9_]+?)
+    (?:_[0-9]{1,3}_[0-9]{3,})?
     """,
     flags=re.VERBOSE,
 )
@@ -187,11 +187,35 @@ class OMICollectionId:
 
     @classmethod
     def from_string(cls, string):
-        match = omi_id.fullmatch(string) or old_omi_id.fullmatch(string)
+        match = omi_id.fullmatch(string)
+        if match is not None:
+            return cls(**match.groupdict())
+
+        match = old_omi_id.fullmatch(string)
         if match is None:
             raise ParserError(f"invalid ocean monitoring indicator ID: {string}")
 
-        return cls(**match.groupdict())
+        parts = match.groupdict()
+        subfamilies = {
+            "OHC": "CLIMATE",
+            "TEMPSAL": "CLIMATE",
+            "CLIMVAR": "VAR_EXTREME",
+            "SI": "CLIMATE",
+            "SL": "CLIMATE",
+            "SEASTATE": "VAR_EXTREME",
+            "HEALTH": "HEALTH",
+            "NATLANTIC": "CIRCULATION",
+            "CURRENTS": "CIRCULATION",
+            "WMHE": "CIRCULATION",
+        }
+        # look up omi_family from the subfamily
+        parts["omi_family"] = subfamilies.get(parts["omi_subfamily"])
+        if parts["omi_family"] is None:
+            raise ParserError(
+                f"invalid ocean monitoring indicator ID (unknown family): {string}"
+            )
+
+        return cls(**parts)
 
     def to_stac(self):
         families = {
