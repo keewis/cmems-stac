@@ -1,6 +1,15 @@
 import re
 from dataclasses import dataclass
 
+
+class ParserError(ValueError):
+    pass
+
+
+class FormatError(ValueError):
+    pass
+
+
 mfc_id = re.compile(
     r"""
     (?P<geographic_area>[A-Z]+)
@@ -71,7 +80,7 @@ class MFCCollectionId:
     def from_string(cls, string):
         match = mfc_id.fullmatch(string)
         if match is None:
-            raise ValueError(f"invalid model and forecasting center ID: {string}")
+            raise ParserError(f"invalid model and forecasting center ID: {string}")
 
         return cls(**match.groupdict())
 
@@ -92,7 +101,7 @@ class MFCCollectionId:
                 "cmems:product_type": self.product_type.lower(),
             }
         except KeyError as e:
-            raise ValueError(f"could not format collection id {self}") from e
+            raise FormatError(f"could not format collection id {self}") from e
 
 
 @dataclass(frozen=True)
@@ -110,7 +119,7 @@ class TACCollectionId:
     def from_string(cls, string):
         match = tac_id.fullmatch(string) or old_tac_id.fullmatch(string)
         if match is None:
-            raise ValueError(f"invalid thematic assembly center ID: {string}")
+            raise ParserError(f"invalid thematic assembly center ID: {string}")
 
         parts = match.groupdict()
         parts.setdefault("thematic", "PHY")
@@ -152,7 +161,7 @@ class TACCollectionId:
                 "cmems:product_type": product_types[self.product_type],
             }
         except KeyError as e:
-            raise ValueError(f"could not format collection id {self}") from e
+            raise FormatError(f"could not format collection id {self}") from e
 
 
 @dataclass
@@ -168,7 +177,7 @@ class OMICollectionId:
     def from_string(cls, string):
         match = omi_id.fullmatch(string)
         if match is None:
-            raise ValueError(f"invalid ocean monitoring indicator ID: {string}")
+            raise ParserError(f"invalid ocean monitoring indicator ID: {string}")
 
         return cls(**match.groupdict())
 
@@ -247,14 +256,14 @@ class OMICollectionId:
                 "cmems:indicator_type": indicator_types[self.indicator_type],
             }
         except KeyError as e:
-            raise ValueError(f"could not format collection id {self}") from e
+            raise FormatError(f"could not format collection id {self}") from e
 
 
 def parse_collection_id(string):
     for cls in [MFCCollectionId, TACCollectionId, OMICollectionId]:
         try:
             return cls.from_string(string)
-        except ValueError:
+        except ParserError:
             pass
 
-    raise ValueError(f"unknown collection id format: {string}")
+    raise ParserError(f"unknown collection id format: {string}")
