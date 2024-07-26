@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 mfc_id = re.compile(
     r"""
-    (?P<geographical_area>[A-Z]+)
+    (?P<geographic_area>[A-Z]+)
     _(?P<product_type>[A-Z]+)
     _(?P<thematic>[A-Z]+)
     (?:_(?P<complementary_info>[A-Z]+))?
@@ -15,7 +15,7 @@ mfc_id = re.compile(
 tac_id = re.compile(
     r"""
     (?P<observation_type>[A-Z]+)
-    _(?P<geographical_area>[A-Z]+)
+    _(?P<geographic_area>[A-Z]+)
     _(?P<thematic>[A-Z]+)
     (?:_(?P<complementary_info>[A-Z]+))??
     _(?P<kind_product>[A-Z0-9]+)
@@ -28,7 +28,7 @@ tac_id = re.compile(
 old_tac_id = re.compile(
     r"""
     (?P<observation_type>[A-Z]+)
-    _(?P<geographical_area>[A-Z]+)
+    _(?P<geographic_area>[A-Z]+)
     _(?P=observation_type)
     _(?P<kind_product>[A-Z0-9]+)
     _(?P<product_type>[A-Z]+)
@@ -58,7 +58,7 @@ thematics = {
 
 @dataclass(frozen=True)
 class MFCCollectionId:
-    geographical_area: str
+    geographic_area: str
     product_type: str
     thematic: str
     complementary_info: str | None
@@ -83,17 +83,20 @@ class MFCCollectionId:
             "MEDSEA": "mediterranean sea",
             "NWSHELF": "northwest shelf",
         }
-        return {
-            "cmems:geographical_area": geographical_areas[self.geographical_area],
-            "cmems:thematic": thematics[self.thematic],
-            "cmems:product_type": self.product_type.lower(),
-        }
+        try:
+            return {
+                "cmems:geographical_area": geographical_areas[self.geographical_area],
+                "cmems:thematic": thematics[self.thematic],
+                "cmems:product_type": self.product_type.lower(),
+            }
+        except KeyError as e:
+            raise ValueError(f"could not format collection id {self}") from e
 
 
 @dataclass(frozen=True)
 class TACCollectionId:
     observation_type: str
-    geographical_area: str
+    geographic_area: str
     thematic: str | None
     complementary_info: str | None
     kind_product: str
@@ -152,7 +155,7 @@ class OMICollectionId:
     product_type: str
     omi_family: str
     omi_subfamily: str
-    geographical_area: str
+    geographic_area: str
     indicator_type: str
 
     @classmethod
