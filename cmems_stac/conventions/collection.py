@@ -45,7 +45,8 @@ omi_id = re.compile(
     _(?P<omi_subfamily>[a-z]+)
     _(?P<geographic_area>[A-Z]+)
     _(?P<indicator_type>[a-z_]+)
-    """
+    """,
+    flags=re.VERBOSE,
 )
 
 thematics = {
