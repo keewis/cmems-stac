@@ -45,6 +45,18 @@ from cmems_stac import conventions
             ),
             id="old_omi3",
         ),
+        pytest.param(
+            "GLOBAL_OMI_WMHE_northward_mht",
+            conventions.collection.OMICollectionId(
+                product_type="OMI",
+                omi_family="CIRCULATION",
+                omi_subfamily="WMHE",
+                indicator_type=None,
+                geographic_area="GLOBAL",
+                observation_type="northward_mht",
+            ),
+            id="old_omi4",
+        ),
     ),
 )
 def test_parse_collection_id(collection_id, expected):
