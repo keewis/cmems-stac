@@ -44,6 +44,7 @@ omi_id = re.compile(
     _(?P<omi_family>CLIMATE|HEALTH|CIRCULATION|VAR_EXTREME)
     _(?P<omi_subfamily>[a-z]+)
     _(?P<geographic_area>[A-Z]+)
+    (?:_(?P<observation_type>[A-Z]+))?
     _(?P<indicator_type>[a-z_]+)
     """,
     flags=re.VERBOSE,
@@ -160,6 +161,7 @@ class OMICollectionId:
     omi_family: str
     omi_subfamily: str
     geographic_area: str
+    observation_type: str | None
     indicator_type: str
 
     @classmethod
