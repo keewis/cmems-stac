@@ -75,7 +75,7 @@ class MFCCollectionId:
         return cls(**match.groupdict())
 
     def to_stac(self):
-        geographical_areas = {
+        geographic_areas = {
             "ARCTIC": "arctic sea",
             "BALTICSEA": "baltic sea",
             "BLKSEA": "black sea",
@@ -86,7 +86,7 @@ class MFCCollectionId:
         }
         try:
             return {
-                "cmems:geographical_area": geographical_areas[self.geographical_area],
+                "cmems:geographic_area": geographic_areas[self.geographic_area],
                 "cmems:thematic": thematics[self.thematic],
                 "cmems:product_type": self.product_type.lower(),
             }
@@ -116,7 +116,7 @@ class TACCollectionId:
         return cls(**parts)
 
     def to_stac(self):
-        geographical_areas = {
+        geographic_areas = {
             "ATL": "european atlantic ocean",  # IBI + NWS
             "ARC": "arctic sea",
             "BAL": "baltic sea",
@@ -143,12 +143,15 @@ class TACCollectionId:
             "STATIC": "static",
         }
 
-        return {
-            "cmems:geographical_area": geographical_areas[self.geographical_area],
-            "cmems:thematic": thematics[self.thematic],
-            "cmems:observation_type": observation_types[self.observation_type],
-            "cmems:product_type": product_types[self.product_type],
-        }
+        try:
+            return {
+                "cmems:geographic_area": geographic_areas[self.geographic_area],
+                "cmems:thematic": thematics[self.thematic],
+                "cmems:observation_type": observation_types[self.observation_type],
+                "cmems:product_type": product_types[self.product_type],
+            }
+        except KeyError as e:
+            raise ValueError(f"could not format collection id {self}") from e
 
 
 @dataclass
@@ -208,7 +211,7 @@ class OMICollectionId:
             "storm": "storm potential",
             "cyclone": "cyclone potential",
         }
-        geographical_areas = {
+        geographic_areas = {
             "ATLANTIC": "atlantic",
             "ARCTIC": "arctic sea",
             "BALTIC": "baltic sea",
@@ -232,14 +235,17 @@ class OMICollectionId:
             "mei": "multivariate enso index",
         }
 
-        return {
-            "cmems:omi_family": families[self.family],
-            "cmems:omi_family_abbrev": self.family,
-            "cmems:omi_subfamily": subfamilies[self.omi_subfamily],
-            "cmems:omi_subfamily_abbrev": self.omi_subfamily,
-            "cmems:geographical_area": geographical_areas[self.geographical_area],
-            "cmems:indicator_type": indicator_types[self.indicator_type],
-        }
+        try:
+            return {
+                "cmems:omi_family": families[self.family],
+                "cmems:omi_family_abbrev": self.family,
+                "cmems:omi_subfamily": subfamilies[self.omi_subfamily],
+                "cmems:omi_subfamily_abbrev": self.omi_subfamily,
+                "cmems:geographic_area": geographic_areas[self.geographic_area],
+                "cmems:indicator_type": indicator_types[self.indicator_type],
+            }
+        except KeyError as e:
+            raise ValueError(f"could not format collection id {self}") from e
 
 
 def parse_collection_id(string):
