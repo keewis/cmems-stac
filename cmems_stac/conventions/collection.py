@@ -157,7 +157,7 @@ def parse_collection_id(string):
     for cls in [MFCCollectionId, TACCollectionId]:
         try:
             return cls.from_string(string)
-        except ValueError:
+        except ParserError:
             pass
 
-    raise ValueError(f"unknown collection id format: {string}")
+    raise ParserError(f"unknown collection id format: {string}")
