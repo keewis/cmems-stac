@@ -1,6 +1,15 @@
 import re
 from dataclasses import dataclass
 
+
+class ParserError(ValueError):
+    pass
+
+
+class FormatError(ValueError):
+    pass
+
+
 mfc_id = re.compile(
     r"""
     (?P<geographical_area>[A-Z]+)
@@ -60,7 +69,7 @@ class MFCCollectionId:
     def from_string(cls, string):
         match = mfc_id.fullmatch(string)
         if match is None:
-            raise ValueError(f"invalid model and forecasting center ID: {string}")
+            raise ParserError(f"invalid model and forecasting center ID: {string}")
 
         return cls(**match.groupdict())
 
@@ -74,11 +83,14 @@ class MFCCollectionId:
             "MEDSEA": "mediterranean sea",
             "NWSHELF": "northwest shelf",
         }
-        return {
-            "cmems:geographical_area": geographical_areas[self.geographical_area],
-            "cmems:thematic": thematics[self.thematic],
-            "cmems:product_type": self.product_type.lower(),
-        }
+        try:
+            return {
+                "cmems:geographical_area": geographical_areas[self.geographical_area],
+                "cmems:thematic": thematics[self.thematic],
+                "cmems:product_type": self.product_type.lower(),
+            }
+        except KeyError as e:
+            raise FormatError("could not format collection id {self}") from e
 
 
 @dataclass(frozen=True)
@@ -96,7 +108,7 @@ class TACCollectionId:
     def from_string(cls, string):
         match = tac_id.fullmatch(string) or old_tac_id.fullmatch(string)
         if match is None:
-            raise ValueError(f"invalid thematic assembly center ID: {string}")
+            raise ParserError(f"invalid thematic assembly center ID: {string}")
 
         parts = match.groupdict()
         parts.setdefault("thematic", "PHY")
@@ -130,12 +142,15 @@ class TACCollectionId:
             "STATIC": "static",
         }
 
-        return {
-            "cmems:geographical_area": geographical_areas[self.geographical_area],
-            "cmems:thematic": thematics[self.thematic],
-            "cmems:observation_type": observation_types[self.observation_type],
-            "cmems:product_type": product_types[self.product_type],
-        }
+        try:
+            return {
+                "cmems:geographical_area": geographical_areas[self.geographical_area],
+                "cmems:thematic": thematics[self.thematic],
+                "cmems:observation_type": observation_types[self.observation_type],
+                "cmems:product_type": product_types[self.product_type],
+            }
+        except KeyError as e:
+            raise FormatError(f"could not format collection id {self}") from e
 
 
 def parse_collection_id(string):
