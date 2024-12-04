@@ -5,7 +5,7 @@ import pystac
 import xarray as xr
 
 
-def split_href(url):
+def split_href(url: str) -> tuple[str, str]:
     fragments = urlsplit(url)
 
     new_url = f"s3://{fragments.path.lstrip('/')}"
@@ -14,7 +14,7 @@ def split_href(url):
     return new_url, endpoint_url
 
 
-def detect_engine(asset):
+def detect_engine(asset: pystac.Asset) -> str:
     match asset.media_type:
         case "application/vnd+zarr":
             engine = "zarr"
@@ -26,7 +26,9 @@ def detect_engine(asset):
     return engine
 
 
-def open_asset(asset, *, storage_options=None, **kwargs):
+def open_asset(
+    asset: pystac.Asset, *, storage_options: dict = None, **kwargs
+) -> xr.Dataset:
     if storage_options is None:
         storage_options = {}
 
@@ -41,12 +43,12 @@ def open_asset(asset, *, storage_options=None, **kwargs):
 
 
 @singledispatch
-def open_stac(value, **kwargs):
+def open_stac(value, **kwargs) -> xr.Dataset:
     pass
 
 
 @open_stac.register
-def _(item: pystac.Item, name):
+def _(item: pystac.Item, name: str) -> xr.Dataset:
     asset = item.assets.get(name)
     if asset is None:
         raise ValueError(f"unknown asset: {name}")
@@ -55,5 +57,5 @@ def _(item: pystac.Item, name):
 
 
 @open_stac.register
-def _(asset: pystac.Asset):
+def _(asset: pystac.Asset) -> xr.Dataset:
     return open_asset(asset)
