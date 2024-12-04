@@ -1,5 +1,7 @@
+from functools import singledispatch
 from urllib.parse import urlsplit, urlunsplit
 
+import pystac
 import xarray as xr
 
 
@@ -36,3 +38,22 @@ def open_asset(asset, *, storage_options=None, **kwargs):
     open_kwargs = {"engine": detect_engine(asset)} | additional_kwargs
 
     return xr.open_dataset(url, storage_options=so, **open_kwargs, **kwargs)
+
+
+@singledispatch
+def open_stac(value, **kwargs):
+    pass
+
+
+@open_stac.register
+def _(item: pystac.Item, name):
+    asset = item.assets.get(name)
+    if asset is None:
+        raise ValueError(f"unknown asset: {name}")
+
+    return open_asset(asset)
+
+
+@open_stac.register
+def _(asset: pystac.Asset):
+    return open_asset(asset)
